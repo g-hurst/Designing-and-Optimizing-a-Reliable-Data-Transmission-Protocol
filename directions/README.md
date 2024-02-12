@@ -1,13 +1,33 @@
 # Project 2: Designing and Optimizing a Reliable Data Transmission Protocol
 
 ## Project Goals:
-In this project, you will design, implement and optimize reliable data transfer protocols. A basic requirement of any reliable transfer protocol is correctness, i.e., although the network itself may drop and reorder packets, application data such as a file should be transferred in order and without loss. However, an equally important consideration is performance.
+In this project, you will design, implement and optimize reliable data transfer protocols.
+A basic requirement of any reliable transfer protocol is correctness, i.e., although the
+network itself may drop and reorder packets, application data such as a file should be
+transferred in order and without loss. However, an equally important consideration is performance.
 
 
-Consider a file of size F bytes transferred over a network with a bandwidth B Megabits/second. Owing to the need to wait for acknowledgments (ACKs), and if necessary retransmit data, it is unlikely any protocol can reliably transfer data at a rate of B Megabits/second. We refer to the ratio of the useful data transferred (file size F) to the total transfer time as the goodput achieved by the protocol. Further, a reliable transfer protocol incurs overheads, which we define as T - F, where T is the total bytes transmitted by the sender or receiver over the network inclusive of ACKs, retransmitted packets, and header fields.
+Consider a file of size F bytes transferred over a network with a bandwidth B Megabits/second.
+Owing to the need to wait for acknowledgments (ACKs), and if necessary retransmit data,
+it is unlikely any protocol can reliably transfer data at a rate of B Megabits/second.
+We refer to the ratio of the useful data transferred (file size F) to the total transfer
+time as the goodput achieved by the protocol. Further, a reliable transfer protocol incurs
+overheads, which we define as T - F, where T is the total bytes transmitted by the sender or
+receiver over the network inclusive of ACKs, retransmitted packets, and header fields.
 
 
-In this project, your goal is to design and implement a reliable transfer protocol that can achieve high goodput, and low overhead under diverse network conditions. You will compare your protocol with a baseline scheme for comparison, which you will also implement. While we provide hints, the specific optimizations that you will implement in your protocol is up to you. While correctness of all implementations is a minimal requirement, the project will be primarily evaluated on (i) the kinds of optimizations you implement; (ii) the performance that you achieve; and (iii) a documentation of the performance of the schemes under different network conditions, along with a clear understanding of the design trade-offs. You will document the above information in a report, which is a mandatory requirement for the project.
+In this project, your goal is to design and implement a reliable transfer protocol that can
+achieve high goodput, and low overhead under diverse network conditions.
+You will compare your protocol with a baseline scheme for comparison, which you will also
+implement. While we provide hints, the specific optimizations that you will implement
+in your protocol is up to you. While correctness of all implementations is a minimal
+requirement, the project will be primarily evaluated on
+
+1. the kinds of optimizations you implement
+2. the performance that you achieve
+3. a documentation of the performance of the schemes under different network conditions, along with a clear understanding of the design trade-offs.
+
+You will document the above information in a report, which is a mandatory requirement for the project.
 
 ### Protocols that you will implement
 You will implement the following protocols:
@@ -36,12 +56,11 @@ We provide code for (i) a network emulator which emulates network conditions bas
 ### Network Emulator (NE)
 The NE emulates an unreliable data transfer layer which can cause data loss, and reorder packets. (See figure 1). The NE is also responsible for enforcing various parameters such as the propagation delay and bandwidth of the network (see Network Parameters for a detailed list). The parameters are set using the configuration file (.ini format).
 
+![alt text](https://github.com/g-hurst/Designing-and-Optimizing-a-Reliable-Data-Transmission-Protocol/blob/master/directions/figure_1.jpg?raw=true)
+(a)
 
-
-
-(a) // put in fig 1 here
-
-(b) // put in fig 2 here
+![alt text](https://github.com/g-hurst/Designing-and-Optimizing-a-Reliable-Data-Transmission-Protocol/blob/master/directions/figure_2.jpg?raw=true)
+(b)
 
 Figure 1: shows (a) the emulator setup and functions; (b) the packet format required by the NE for transmission.
 
