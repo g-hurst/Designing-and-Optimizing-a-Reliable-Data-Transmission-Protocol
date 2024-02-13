@@ -56,10 +56,10 @@ We provide code for (i) a network emulator which emulates network conditions bas
 ### Network Emulator (NE)
 The NE emulates an unreliable data transfer layer which can cause data loss, and reorder packets. (See figure 1). The NE is also responsible for enforcing various parameters such as the propagation delay and bandwidth of the network (see Network Parameters for a detailed list). The parameters are set using the configuration file (.ini format).
 
-![alt text](https://github.com/g-hurst/Designing-and-Optimizing-a-Reliable-Data-Transmission-Protocol/blob/master/directions/figure_1.jpg?raw=true)
+![alt text](https://github.com/g-hurst/Designing-and-Optimizing-a-Reliable-Data-Transmission-Protocol/blob/master/directions/figure_1.png?raw=true)
 (a)
 
-![alt text](https://github.com/g-hurst/Designing-and-Optimizing-a-Reliable-Data-Transmission-Protocol/blob/master/directions/figure_2.jpg?raw=true)
+![alt text](https://github.com/g-hurst/Designing-and-Optimizing-a-Reliable-Data-Transmission-Protocol/blob/master/directions/figure_2.png?raw=true)
 (b)
 
 Figure 1: shows (a) the emulator setup and functions; (b) the packet format required by the NE for transmission.
