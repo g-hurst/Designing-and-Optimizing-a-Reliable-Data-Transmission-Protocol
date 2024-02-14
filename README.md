@@ -5,9 +5,9 @@ and low overhead under diverse network conditions. You will compare your protoco
 which you will also implement.  While we provide hints, the specific optimizations that you will implement in your
 protocol is up to you. While correctness of all implementations is a minimal requirement, the project will be primarily evaluated on
 
-1. the kinds of optimizations you implement
-2. the performance that you achieve
-3. a documentation of the performance of the schemes under different network conditions, along with a clear understanding of the design trade-offs.
+1. The kinds of optimizations you implement
+2. The performance that you achieve
+3. A documentation of the performance of the schemes under different network conditions, along with a clear understanding of the design trade-offs.
 
 You will document the above information in a report, which is a mandatory requirement for the project.
 
@@ -23,10 +23,10 @@ Do not modify the Emulator, Monitor.
 
 For code submission (both interim code submission), you will need to submit 4 files:
 
- * receiver.py (The receiver of your optimized protocol)
- * receiver_stop_and_go.py (The receiver of your stop and go implementation)
- * sender.py (The sender of your optimized protocol)
- * sender_stop_and_go.py (The sender of your stop and go implementation)
+ * `receiver.py` (The receiver of your optimized protocol)
+ * `receiver_stop_and_go.py` (The receiver of your stop and go implementation)
+ * `sender.py` (The sender of your optimized protocol)
+ * `sender_stop_and_go.py` (The sender of your stop and go implementation)
 
 Note that the name of the file must be matching exactly as the one listed above to prevent auto grader failure. Please do not submit zip file or directory.
 
