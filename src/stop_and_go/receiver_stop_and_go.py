@@ -26,7 +26,6 @@ class Packet():
     def __lt__(self, other):
         return self.id < other.id
 
-
 class Writer(threading.Thread):
     def __init__(self, f_name):
         super().__init__()
@@ -112,6 +111,7 @@ def main():
     args = parser.parse_args()
 
     receiver = Receiver(args.config_path)
+    print(receiver)
     receiver.start()
 
 if __name__ == '__main__':

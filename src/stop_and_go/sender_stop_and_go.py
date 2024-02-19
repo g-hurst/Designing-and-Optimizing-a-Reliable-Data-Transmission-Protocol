@@ -68,9 +68,7 @@ def main():
 
     sender = Sender(args.config_path)
     print(sender)
-    
     sender.run()
-
 
 if __name__ == '__main__':
     main()
