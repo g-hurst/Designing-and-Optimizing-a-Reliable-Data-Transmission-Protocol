@@ -72,9 +72,9 @@ class Receiver(Monitor, threading.Thread):
         threading.Thread.__init__(self)
         self.cfg = configparser.RawConfigParser(allow_no_value=True)
         self.cfg.read(cfg_path)
-        self.send_id = int(self.cfg.get('sender', 'id'))
-        self.file    = self.cfg.get('receiver', 'write_location')
-        self.writer  = Writer(self.file)
+        self.send_id  = int(self.cfg.get('sender', 'id'))
+        self.out_file = self.cfg.get('receiver', 'write_location')
+        self.writer   = Writer(self.out_file)
         self.writer.start()
         self._stay_alive   = threading.Event()
     def __str__(self, blocking=True):
@@ -88,13 +88,13 @@ class Receiver(Monitor, threading.Thread):
             try:
                 recv_sender, recv_data = self.recv(self.Config.MAX_PACKET_SIZE)
                 pkt = Packet(recv_data)
-                print(f'got packet {pkt.id}')
                 if pkt.id == packets_recieved:
                     self.writer.packets_push(pkt)
                     packets_recieved += 1
                 if pkt.id <= packets_recieved:
                     self.send(self.send_id, f'{pkt.id}'.encode())
                 if packets_recieved == pkt.total:
+                    self.recv_end(self.out_file, self.send_id)
                     self.kill()
             except socket.timeout:
                 print('timeout occurred')
