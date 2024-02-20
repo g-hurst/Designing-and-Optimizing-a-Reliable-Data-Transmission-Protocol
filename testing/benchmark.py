@@ -18,9 +18,10 @@ def parse_sender(cwd):
         gp = float(matches[0])
     else:
         gp =  None
-    matches = re.findall(r'Overhead\s*:\s*(\d+)\s*bytes', data)
-    if matches:
-        oh = float(matches[0])
+    matches1 = re.findall(r'Overhead\s*:\s*(\d+)\s*bytes', data)
+    matches2 = re.findall(r'Total Bytes Transmitted\s*:\s*(\d+)\s*bytes', data)
+    if matches1 and matches2:
+        oh = int(matches1[0]) / int(matches2[0])
     else:
         oh =  None
     return (gp, oh)
@@ -81,10 +82,10 @@ def main():
         dropped_pkts.append(drop_pkts)
         reordered_pkts.append(rord_pkts)
         
-        print(f'[{round(time_diff,3)}]: test ({i+1}/{n}) -> {gp} bytes/sec, {oh} bytes')
-
-    print(f'goodput:  {np.mean(goodputs)}[{np.std(goodputs)}]')
-    print(f'overhead: {np.mean(overheads)}[{np.std(overheads)}]')
+        print(f'[{round(time_diff,3)}]: test ({i+1}/{n}) -> {gp} bytes/sec, {round(oh*100,2)} %')
+    r = lambda x: int(round(x, 0))
+    print(f'goodput:  {r(np.mean(goodputs))}[{r(np.std(goodputs))}]')
+    print(f'overhead: {round(np.mean(overheads)*100,2)}[{round(np.std(overheads)*100,2)}]')
 
     with open('./test_results.log', 'a') as f:
         results = {'goodputs':goodputs,
