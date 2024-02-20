@@ -89,13 +89,14 @@ class Receiver(Monitor, threading.Thread):
                 print('timeout occurred in reciever')
         
         # hang out for any missed packets in the end
-        timeout = self.timeout * 3
+        timeout    = self.timeout * 3
         start_time = time.time()
         self.socketfd.settimeout(timeout)
-        while time.time() -  start_time < timeout:
+        while time.time() - start_time < timeout:
             try:
                 recv_sender, recv_data = self.recv(self.Config.MAX_PACKET_SIZE)
                 self.send(self.send_id, f'{self.writer.packets_curr() - 1}'.encode()) # ack'n
+                print(f'acking {self.writer.packets_curr() - 1}')
             except socket.timeout:
                 break
 

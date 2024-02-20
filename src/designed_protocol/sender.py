@@ -44,10 +44,9 @@ class Ack_buff():
                 c = self._packets[0].id
         return c
     def update(self, packet_num:int):
-        curr = self.curr()
-        while (curr != None) and (curr <= packet_num):
-            self.pop()
-            curr = self.curr()
+        with self._lock:
+            while (len(self._packets) > 0) and (self._packets[0].id <= packet_num):
+                self._packets.pop(0)
 
 class Sender(Monitor):
     def __init__(self, cfg_path):
@@ -79,7 +78,7 @@ class Sender(Monitor):
         return total_packets
 
     def handle_acks(self, kill:threading.Event, total_packets:int):
-        while (not kill.is_set()) and (self.buffer.curr() != total_packets - 1):
+        while (not kill.is_set()) and (self.buffer.curr() != total_packets):
             try:
                 ack_sender, ack_data = self.recv(self.Config.MAX_PACKET_SIZE)
                 if (ack_sender == self.recv_id):
@@ -106,7 +105,7 @@ class Sender(Monitor):
                     self.buffer.push(pkt)
                     pbar.update(1)
         while self.buffer.size() > 0:
-            pass 
+            pass
         ack_killer.set()
 
         self.send_end(self.recv_id)
