@@ -86,8 +86,12 @@ class Sender(Monitor):
                     ack_num = int(ack_data.decode())
                     self.buffer.update(ack_num)
             except:
-                self.send(self.recv_id, self.buffer.get(0).format())
-                print(f'timeout on packet[{self.buffer.curr()}]')
+                pkt = self.buffer.get(0)
+                if pkt != None:
+                    self.send(self.recv_id, pkt.format())
+                    print(f'timeout on packet[{pkt.id}]')
+                else:
+                    print(f'timeout on EMPTY')
 
     def run(self):
         total_packets = self.get_packets()
@@ -101,7 +105,9 @@ class Sender(Monitor):
                     self.send(self.recv_id, pkt.format())
                     self.buffer.push(pkt)
                     pbar.update(1)
-        ack_handler.join()
+        while self.buffer.size() > 0:
+            pass 
+        ack_killer.set()
 
         self.send_end(self.recv_id)
 

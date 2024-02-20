@@ -3,6 +3,7 @@
 import argparse
 import socket
 import threading
+import time
 
 import configparser
 
@@ -60,10 +61,11 @@ class Receiver(Monitor, threading.Thread):
     def __init__(self, cfg_path):
         Monitor.__init__(self, cfg_path, 'receiver')
         threading.Thread.__init__(self)
-        self.cfg = configparser.RawConfigParser(allow_no_value=True)
-        self.cfg.read(cfg_path)
-        self.send_id  = int(self.cfg.get('sender', 'id'))
-        self.out_file = self.cfg.get('receiver', 'write_location')
+        cfg = configparser.RawConfigParser(allow_no_value=True)
+        cfg.read(cfg_path)
+        self.send_id  = int(cfg.get('sender', 'id'))
+        self.out_file = cfg.get('receiver', 'write_location')
+        self.timeout  = (self.Config.MAX_PACKET_SIZE / self.Config.LINK_BANDWIDTH) + 2 * float(cfg.get('network', 'PROP_DELAY'))
         self.writer   = Writer(self.out_file)
         self.writer.start()
         self._stay_alive   = threading.Event()
@@ -84,7 +86,19 @@ class Receiver(Monitor, threading.Thread):
                     self.recv_end(self.out_file, self.send_id)
                     self.kill()
             except socket.timeout:
-                print('timeout occurred')
+                print('timeout occurred in reciever')
+        
+        # hang out for any missed packets in the end
+        timeout = self.timeout * 3
+        start_time = time.time()
+        self.socketfd.settimeout(timeout)
+        while time.time() -  start_time < timeout:
+            try:
+                recv_sender, recv_data = self.recv(self.Config.MAX_PACKET_SIZE)
+                self.send(self.send_id, f'{self.writer.packets_curr() - 1}'.encode()) # ack'n
+            except socket.timeout:
+                break
+
     def kill(self):
         self._stay_alive.clear()  
 
