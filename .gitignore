@@ -1,3 +1,6 @@
 src/stop_and_go/__pycache__
 src/stop_and_go/*.log
 src/stop_and_go/*.txt
+src/designed_protocol/__pycache__
+src/designed_protocol/*.log
+src/designed_protocol/*.txt
