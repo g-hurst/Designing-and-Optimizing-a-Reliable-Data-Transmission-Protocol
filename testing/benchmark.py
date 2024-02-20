@@ -62,7 +62,7 @@ def run_test(config_file, cwd, log=False):
 
 def main():
     cfg_name = 'testing_config.ini'
-    cwd      = '../src/designed_protocol'
+    cwd      = '../src/stop_and_go'
     cfg_path = os.path.join('../../test_config/', cfg_name)
     
     n = 5
