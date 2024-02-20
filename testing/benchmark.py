@@ -2,10 +2,11 @@
 
 import subprocess as sp
 import threading
-import argparse
 import os
 import re
 import json
+import numpy as np
+import time
 
 def parse_sender(cwd):
     f_path = os.path.join(cwd, 'sender_monitor.log')
@@ -14,9 +15,15 @@ def parse_sender(cwd):
     
     matches = re.findall(r'Goodput\s*:\s*(\d+\.\d+)\s*bytes/sec', data)
     if matches:
-        return float(matches[0])
+        gp = float(matches[0])
     else:
-        return None
+        gp =  None
+    matches = re.findall(r'Overhead\s*:\s*(\d+)\s*bytes', data)
+    if matches:
+        oh = float(matches[0])
+    else:
+        oh =  None
+    return (gp, oh)
 
 def parse_emulator(cwd):
     f_path = os.path.join(cwd, 'emulator.log')
@@ -53,28 +60,39 @@ def run_test(config_file, cwd, log=False):
         thread.join()
 
 def main():
-    cfg_name = 'config3.ini'
+    cfg_name = 'testing_config.ini'
     cwd      = '../src/designed_protocol'
     cfg_path = os.path.join('../../test_config/', cfg_name)
     
-    n=10
+    n = 5
     goodputs       = []
+    overheads      = []
     dropped_pkts   = []
     reordered_pkts = []
+    start_time = time.time()
     for i in range(n):
         run_test(cfg_path, cwd)
-        gp  = parse_sender(cwd)
+        time_diff            = time.time() - start_time 
+        gp, oh               = parse_sender(cwd)
         drop_pkts, rord_pkts = parse_emulator(cwd)
+        
         goodputs.append(gp)
+        overheads.append(oh)
         dropped_pkts.append(drop_pkts)
         reordered_pkts.append(rord_pkts)
-        print(f'test ({i+1}/{n}) -> {gp} bytes/sec')
+        
+        print(f'[{round(time_diff,3)}]: test ({i+1}/{n}) -> {gp} bytes/sec, {oh} bytes')
+
+    print(f'goodput:  {np.mean(goodputs)}[{np.std(goodputs)}]')
+    print(f'overhead: {np.mean(overheads)}[{np.std(overheads)}]')
 
     with open('./test_results.log', 'a') as f:
         results = {'goodputs':goodputs,
+                    'overheads':overheads,
                     'dropped_pkts':dropped_pkts,
                     'reordered_pkts':reordered_pkts
                 }
+        results = {'description':'FILL_ME', 'results':results}
         f.write(json.dumps(results))
         f.write('\n')
 
