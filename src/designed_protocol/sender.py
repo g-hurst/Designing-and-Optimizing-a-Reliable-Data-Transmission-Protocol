@@ -7,7 +7,6 @@ import math
 import sys
 
 import configparser
-from tqdm import tqdm
 
 import threading
 
@@ -97,13 +96,11 @@ class Sender(Monitor):
         ack_killer    = threading.Event()
         ack_handler   = threading.Thread(target=self.handle_acks, args=(ack_killer,total_packets))
         ack_handler.start()
-        with tqdm(total=total_packets) as pbar:
-            while len(self.packet_queue) > 0:
-                if self.buffer.size() < self.window_sz:
-                    pkt = self.packet_queue.pop(0)
-                    self.send(self.recv_id, pkt.format())
-                    self.buffer.push(pkt)
-                    pbar.update(1)
+        while len(self.packet_queue) > 0:
+            if self.buffer.size() < self.window_sz:
+                pkt = self.packet_queue.pop(0)
+                self.send(self.recv_id, pkt.format())
+                self.buffer.push(pkt)
         while self.buffer.size() > 0:
             pass
         ack_killer.set()

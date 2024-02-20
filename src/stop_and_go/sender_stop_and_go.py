@@ -7,7 +7,6 @@ import math
 import sys
 
 import configparser
-from tqdm import tqdm
 
 import threading
 
@@ -43,17 +42,15 @@ class Sender(Monitor):
     def run(self):
         self.get_packets()
         curr_packet_num = 0
-        with tqdm(total=len(self.packet_queue)) as pbar:
-            while len(self.packet_queue) > 0:
-                try:   
-                    self.send(self.recv_id, self.packet_queue[curr_packet_num])
-                    ack_sender, ack_data = self.recv(self.Config.MAX_PACKET_SIZE)
-                    if (ack_sender == self.recv_id) and (int(ack_data.decode())  == curr_packet_num):
-                        self.packet_queue.pop(curr_packet_num)
-                        curr_packet_num += 1
-                        pbar.update(1)
-                except socket.timeout:
-                    print(f'timeout occured: resending packet[{curr_packet_num}]')
+        while len(self.packet_queue) > 0:
+            try:   
+                self.send(self.recv_id, self.packet_queue[curr_packet_num])
+                ack_sender, ack_data = self.recv(self.Config.MAX_PACKET_SIZE)
+                if (ack_sender == self.recv_id) and (int(ack_data.decode())  == curr_packet_num):
+                    self.packet_queue.pop(curr_packet_num)
+                    curr_packet_num += 1
+            except socket.timeout:
+                print(f'timeout occured: resending packet[{curr_packet_num}]')
         
         self.send_end(self.recv_id)
 

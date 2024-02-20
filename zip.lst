@@ -1,0 +1,6 @@
+# run with $ zip submission.zip -j -@  < zip.lst
+./src/designed_protocol/com.py
+./src/designed_protocol/receiver.py
+./src/designed_protocol/sender.py
+./src/stop_and_go/receiver_stop_and_go.py
+./src/stop_and_go/sender_stop_and_go.py
