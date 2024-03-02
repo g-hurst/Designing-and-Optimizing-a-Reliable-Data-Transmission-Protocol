@@ -1,3 +1,5 @@
+import time
+
 class Packet():
     def __init__(self, data, is_bytes=False):
         if is_bytes:
@@ -5,6 +7,7 @@ class Packet():
         self.id    = data[0][0]
         self.total = data[0][1]
         self.data  = data[1]
+        self._time = time.time()
     def __repr__(self):
         return f'Packet<{self.id}/{self.total}>'
     def __lt__(self, other):
@@ -22,3 +25,7 @@ class Packet():
     def format(self):
         header = (str((self.id,self.total)) + '|').encode()
         return header + self.data
+    def get_age(self):
+        return time.time() - self._time
+    def reset_age(self):
+        self._time = time.time()
