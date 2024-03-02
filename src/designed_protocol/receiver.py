@@ -102,7 +102,6 @@ class Receiver(Monitor, threading.Thread):
         msg += '\n  '.join([f'{k} == {v}' for (k,v) in self.__dict__.items()])
         return msg
 
-
     def run(self):
         self._stay_alive.set()
         packets_recieved = 0

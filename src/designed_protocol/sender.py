@@ -95,10 +95,10 @@ class Sender(Monitor):
     def send(self, pkt):
         super().send(self.recv_id, pkt.format())
         pkt.reset_age()
-    def update_timeout(self, rtt:int):
+    def update_rtt(self, rtt:int):
         a = 0.875
-        rtt *= 1.5
-        self.rtt     = self.rtt * a + rtt * (1-a)
+        rtt     *= 1.5
+        self.rtt = self.rtt * a + rtt * (1-a)
 
     def update_window(self, is_congested=False):
         if is_congested:
@@ -114,8 +114,7 @@ class Sender(Monitor):
                 if new > self.cong_thresh:
                     self.window_sz = self.cong_thresh
                 else:
-                    self.window_sz = new
-            print(f'window: {old} -> {self.window_sz}')
+                    self.window_sz = new            
 
     def get_packets(self):
         # TODO: when a file is VERY large, will run out of 
@@ -131,22 +130,24 @@ class Sender(Monitor):
                 )
         return total_packets
 
+    def handle_timeouts(self, kill:threading.Event):
+        while (not kill.is_set()):
+            pkt = self.buffer.get()
+            if pkt != None and pkt.get_age() > self.timeout:
+                self.send(pkt)
+                self.buffer.cycle()
+                print(f'timeout: {pkt}')
+
     def handle_acks(self, kill:threading.Event, total_packets:int):
         acked        = set(list(range(total_packets)))
         last_ping    = time.time()
 
         def _send_zipup():
-            ack = sorted(list(acked))[::-1]
-            edge_found = False
-            for i in range(len(ack) - 1):
-                if not edge_found and (ack[i] - ack[i+1] == 1):
-                    continue
-                else:
-                    edge_found = False
-                    pkt = self.buffer.get(ack[i])
-                    if pkt:
-                        print(f'resend {ack[i]}') 
-                        self.send(pkt)
+            for pkt_id in acked:
+                pkt = self.buffer.get(pkt_id)
+                if pkt and pkt.get_age() > self.rtt:
+                    # print(f'resend {pkt_id}') 
+                    self.send(pkt)
 
         while (not kill.is_set()) and (len(acked) > 0):
             # for every timeout seconds, update the window size
@@ -162,7 +163,7 @@ class Sender(Monitor):
                     pkt = self.buffer.remove(ack_num)
                     if pkt:
                         acked.remove(ack_num)
-                        self.update_timeout(pkt.get_age())
+                        self.update_rtt(pkt.get_age())
                     
                     if self.is_buff_only:
                         _send_zipup()
@@ -185,16 +186,24 @@ class Sender(Monitor):
         ack_handler   = threading.Thread(target=self.handle_acks, args=(ack_killer,total_packets))
         ack_handler.start()
 
+        timeout_killer  = threading.Event()
+        timeout_handler = threading.Thread(target=self.handle_timeouts, args=(timeout_killer,))
+        timeout_handler.start()
+
         while len(self.packet_queue) > 0:
             if self.buffer.size() < self.window_sz:
                 pkt = self.packet_queue.pop(0)
                 self.send(pkt)
                 self.buffer.push(pkt)
-                # print(f'{pkt} -> [{self.buffer.size()}]')
+                print(f'{pkt} -> buff_sz[{self.buffer.size()}]')
         self.is_buff_only = True
+        
+        # wait for the buffer to clear
+        print('waiting for the buffer to clear')
         while self.buffer.size() > 0:
             pass
         ack_killer.set()
+        timeout_killer.set()
         self.send_end(self.recv_id)
 
 
