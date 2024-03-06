@@ -11,7 +11,7 @@ class Packet():
     def __repr__(self):
         return f'Packet<{self.id}/{self.total}>'
     def __lt__(self, other):
-        return self.id < other.id
+        return self.get_id() < other.get_id()
     def unformat(self, data):
         data = data.split(b'|', maxsplit=1)
         data[0] = list(map(int, (data[0]
@@ -29,3 +29,9 @@ class Packet():
         return time.time() - self._time
     def reset_age(self):
         self._time = time.time()
+    def get_data(self):
+        return self.data
+    def get_id(self):
+        return self.id
+    def get_total(self):
+        return self.total
