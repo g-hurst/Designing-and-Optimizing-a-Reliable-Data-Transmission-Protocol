@@ -43,7 +43,7 @@ class Writer(threading.Thread):
                 
                 self.curr_spin = False
                 if do_write:
-                    print(f'writing -> {self.pkt_curr}/{total}')
+                    # print(f'writing -> {self.pkt_curr}/{total}')
                     with open(self._f_name, 'ab') as f:
                         f.write(data)
                     

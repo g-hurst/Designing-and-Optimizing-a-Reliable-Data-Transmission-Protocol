@@ -75,7 +75,7 @@ class Sender(Monitor):
         self.rtt           = (self.ppbw + 2 * float(cfg.get('network', 'PROP_DELAY')))
         self.timeout       = 4 * self.rtt
         self.cong_thresh   = int(self.rtt / self.ppbw)
-        self.cong_thresh_max = self.cong_thresh 
+        self.cong_thresh_max = self.cong_thresh * 1.25
         self.window_sz     = self.cong_thresh
         self.is_buff_only  = False
         # self.socketfd.settimeout(self.timeout)
@@ -88,8 +88,9 @@ class Sender(Monitor):
         pkt.reset_age()
     def update_rtt(self, rtt:int):
         a = 0.875
-        rtt     *= 1.35
-        self.rtt = self.rtt * a + rtt * (1-a)
+        rtt     *= 1.65
+        self.rtt     = self.rtt * a + rtt * (1-a)
+        self.timeout = self.timeout * a + self.rtt * (1-a)
 
     def update_window(self, is_congested=False):
         if is_congested:
@@ -132,13 +133,14 @@ class Sender(Monitor):
         ack_scanner   = Process(target=self.scan_acks)
         ack_scanner.start()
 
-        acked     = set(list(range(total_packets)))
-        last_ping = time.time()
+        acked       = set(list(range(total_packets)))
+        fast_resent = set()
+        last_ping   = time.time()
 
         def _send_zipup():
             for pkt_id in acked:
                 pkt = self.buffer.get(id=pkt_id)
-                if pkt and pkt.get_age() > self.rtt:
+                if pkt and (pkt.get_age() > self.rtt / 2):
                     print(f'resend {pkt_id}')
                     self.send(pkt)
 
@@ -152,12 +154,23 @@ class Sender(Monitor):
             # time it took to ack the given packet
             try:
                 ack_num = self.ack_queue.get_nowait() # errors when queue is empty
+
+                # remove the packet from buffer
                 if ack_num in acked:
                     pkt = self.buffer.remove(ack_num)
                     if pkt:
                         acked.remove(ack_num)
                         self.update_rtt(pkt.get_age())
-                        self.timeout = self.rtt
+
+                # check current ack num compared to lowest packet in buffer
+                # retransmit if needed
+                pkt = self.buffer.get()
+                if pkt and (ack_num - pkt.get_id() > 2) and (pkt.get_id() not in fast_resent):
+                    print(f'fast retransmit: {pkt.get_id()}')
+                    fast_resent.add(pkt.get_id())
+                    self.send(pkt)
+                    self.buffer.cycle()
+
             except:
                 pass
             
@@ -165,15 +178,19 @@ class Sender(Monitor):
             if self.ack_queue.empty():
                 pkt = self.buffer.get()
                 if pkt and (pkt.get_age() > self.timeout):
+                    # self.update_window(is_congested=True)
+                    # self.timeout = self.timeout * 1.5
                     print(f'timeout: {pkt} age  {pkt.get_age()}')
                     self.send(pkt)
                     self.buffer.cycle()
             # else:
             #     print(f'size of ackbuff {self.ack_queue.qsize()}')
 
-            if self.is_buff_only:
-                self.is_buff_only = False
-                _send_zipup()
+
+            # zip up unsent packets when no more packets can be added to buff
+            # if self.is_buff_only:
+            #     self.is_buff_only = False
+            #     _send_zipup()
 
         ack_scanner.terminate()
         ack_scanner.join()

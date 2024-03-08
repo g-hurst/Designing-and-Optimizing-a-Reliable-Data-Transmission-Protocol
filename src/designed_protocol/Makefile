@@ -2,7 +2,7 @@
 SENDER_PATH = "./sender.py"
 RECEIVER_PATH = "./receiver.py"
 
-SENDER_PORT = 22081
+SENDER_PORT = 8001
 RECEIVER_PORT = 8002
 
 # Runs the sender

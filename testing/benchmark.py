@@ -47,9 +47,9 @@ def run_test(config_file, cwd, log=False):
                 print('SUCCESS RUNNING:', out.args)
 
     commands = [
+        f'python3 ../../emulator/emulator.py {config_file}',
         f'make run-receiver config={config_file}',
-        f'make run-sender config={config_file}',
-        f'python3 ../../emulator/emulator.py {config_file}'
+        f'make run-sender config={config_file}'
     ]
 
     threads = []
@@ -62,10 +62,10 @@ def run_test(config_file, cwd, log=False):
 
 def main():
     cfg_name = 'testing_config.ini'
-    cwd      = '../src/designed_protocol'
+    cwd      = '../src/stop_and_go'
     cfg_path = os.path.join('../../test_config/', cfg_name)
     
-    n = 5
+    n = 10
     goodputs       = []
     overheads      = []
     dropped_pkts   = []
@@ -83,6 +83,7 @@ def main():
         reordered_pkts.append(rord_pkts)
         
         print(f'[{round(time_diff,3)}]: test ({i+1}/{n}) -> {gp} bytes/sec, {round(oh*100,2)} %')
+    
     r = lambda x: int(round(x, 0))
     print(f'goodput:  {r(np.mean(goodputs))}[{r(np.std(goodputs))}]')
     print(f'overhead: {round(np.mean(overheads)*100,2)}[{round(np.std(overheads)*100,2)}]')
